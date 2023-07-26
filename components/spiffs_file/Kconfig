@@ -1,0 +1,40 @@
+menu "GSDC SPIFFS Configuration"
+
+    config GSDC_SPIFFS_CHECK_ON_START
+        bool "Run SPIFFS_check on every start-up"
+        default y
+        help
+            If this config item is set, esp_spiffs_check() will be run on every start-up.
+            Slow on large flash sizes.
+
+    config GSDC_SPIFFS_PARTITION_LABEL
+        string "Named partition"
+        default "configuration"
+        help
+            This is the name of the partition used to store the configuration file.
+            It is possible to have multiple partitions. The partition layout is found
+            in the Custom CSV file specified above in the Partition table section
+
+    config GSDC_SPIFFS_CONFIG_FILE_SYSTEM_ROOT
+        string "File System root"
+        default "/fs"
+
+    choice GSDC_SPIFFS_INCLUDE_PARTITION_IMAGE_IN_BUILD
+        prompt "Create the Partition Image when building the solution"
+        default GSDC_SPIFFS_INCLUDE_PARTITION_IMAGE
+        help
+            Selecting 'Include Partition Image' causes the partition image to be created as part of the build. This 
+            will then be included in the flash process.
+
+            Selecting 'Exclude Partition Image' causes the partition image to not be created as part of the build. The 
+            Partition Image is not in the flash process.
+
+            NOTE: You can always upload the Partition Image manually
+
+        config GSDC_SPIFFS_EXCLUDE_PARTITION_IMAGE
+            bool "Exclude Partition Image" 
+            
+        config GSDC_SPIFFS_INCLUDE_PARTITION_IMAGE
+            bool "Include Partition Image" 
+    endchoice
+endmenu
