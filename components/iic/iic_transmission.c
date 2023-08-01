@@ -1,4 +1,4 @@
-#include "iic_transmisson.h"
+#include "gsdc_iic_transmisson.h"
 #include "esp_system.h"
 
 /**
@@ -28,7 +28,7 @@ esp_err_t __attribute__((unused)) i2c_master_read_from_slave(uint8_t iicAddress,
     
     return ret;
 }
-void i2c_master_read_variable_length_from_slave(connected_device_t * device)
+void i2c_master_read_variable_length_from_slave(gsdc_iic_connected_device_t * device)
 {
     char data_size[IIC_MESSAGE_LENGTH_FIELD_SIZE+1];
     uint8_t *pSizeData = (uint8_t *)calloc(IIC_MESSAGE_LENGTH_FIELD_SIZE+1, sizeof(uint8_t));

@@ -3,8 +3,7 @@ SET(app_sources
         "iic_configuration.c"
         "iic_common.c"
         "iic_transmission.c"
-        "iic_receiver.c"
-        "master.c")
+        "iic_receiver.c")
     
 set(components 
         "log" 

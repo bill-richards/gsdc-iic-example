@@ -1,4 +1,4 @@
-#include "iic_common.h"
+#include "gsdc_iic_common.h"
 
 #include <stdio.h>
 

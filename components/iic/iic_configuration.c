@@ -1,5 +1,5 @@
-#include "iic_configuration.h"
-#include "iic_common.h"
+#include "gsdc_iic_configuration.h"
+#include "gsdc_iic_common.h"
 
 #include "esp_logging.h"
 #include "configuration_file.h"
@@ -9,19 +9,19 @@ static const char * IIC_CONFIGURATION_TAG = "iic_configuration";
 static const char * clients_key =  "CLIENTS";
 static const char * local_key =  "IIC";
 
-connected_device_t * iic_configuration_get_connected_device(int index);
+gsdc_iic_connected_device_t * iic_configuration_get_connected_device(int index);
 void iic_configuration_load_iic_configuration(void);
 bool iic_configuration_read_configuration_item(const char * key, config_key_value_pair_t * config_line);
 config_key_value_pair_t * create_new_config_line(void);
 
 void parse_clients(int configuration_item_index, uint8_t iic_master);
 
-iic_configuration_t IIC_Configuration;
+gsdc_iic_configuration_t IIC_Configuration;
 
-iic_configuration_t * gsdc_iic_configuration_init(configuration_file_data_t * spiffs_info)
+gsdc_iic_configuration_t * gsdc_iic_configuration_init(gsdc_iic_configuration_file_data_t * spiffs_info)
 {
     ESP_LOGI(IIC_CONFIGURATION_TAG, "Initializing IIC configuration ...");
-    iic_configuration_t configuration = {
+    gsdc_iic_configuration_t configuration = {
         .SpiffsInfo = spiffs_info,
         .get_connected_device = iic_configuration_get_connected_device,
         .read_configuration_item = iic_configuration_read_configuration_item,
@@ -32,7 +32,7 @@ iic_configuration_t * gsdc_iic_configuration_init(configuration_file_data_t * sp
     return &IIC_Configuration;
 }
 
-connected_device_t * iic_configuration_get_connected_device(int index) {
+gsdc_iic_connected_device_t * iic_configuration_get_connected_device(int index) {
     return &IIC_Configuration.ConnectedDevices[index];
 }
 
@@ -104,18 +104,18 @@ void parse_clients(int configuration_item_index, uint8_t iic_master)
     int index = 0;
 
     free(IIC_Configuration.ConnectedDevices);
-    connected_device_t * clients = (connected_device_t *)calloc(IIC_CONFIGURATION_MAXIMUM_CONNECTED_DEVICES, sizeof(connected_device_t));
+    gsdc_iic_connected_device_t * clients = (gsdc_iic_connected_device_t *)calloc(IIC_CONFIGURATION_MAXIMUM_CONNECTED_DEVICES, sizeof(gsdc_iic_connected_device_t));
 
     while((current_address = strtok_r(saveptr, " ", &saveptr)))
     {
-        connected_device_t client = {
+        gsdc_iic_connected_device_t client = {
             .I2CAddress = strtol(current_address, (char**)NULL, 16),
             .MasterI2CAddress = iic_master,
             .DataLength = 0,
             //.ReceivedData = (uint8_t *)calloc(PACKET_LENGTH, sizeof(uint8_t)),
         };
 
-        memcpy(&clients[index++], &client, sizeof(connected_device_t));
+        memcpy(&clients[index++], &client, sizeof(gsdc_iic_connected_device_t));
         ESP_LOGV(IIC_CONFIGURATION_TAG, "\t\tConnected address : %x", client.I2CAddress);
     }
     IIC_Configuration.ConnectedDeviceCount = index;

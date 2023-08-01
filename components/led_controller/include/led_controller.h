@@ -26,7 +26,7 @@ struct led_controller {
 };
 
 
-led_controller_t * get_led_controller_configured_for_gpio_pin(gpio_num_t gpio_pin);
+led_controller_t * create_led_controller_configured_for_gpio_pin(gpio_num_t gpio_pin);
 
 #ifdef __cplusplus
 }

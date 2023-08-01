@@ -1,6 +1,5 @@
-#include <iic_common.h>
-#include <iic_configuration.h>
-#include <receiver_task.h>
+#include <gsdc_iic_common.h>
+#include <gsdc_iic_configuration.h>
 #include <stdio.h>
 #include <string.h>
 #include <esp_logging.h>
@@ -9,21 +8,21 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "iic_receiver.h"
+#include "gsdc_iic_receiver.h"
 
 void command_received_callback_task(void * parameters);
-esp_err_t receiver_init(iic_configuration_t * iicConfiguration);
+esp_err_t receiver_init(gsdc_iic_configuration_t * iicConfiguration);
 void receiver_task(void * parameters);
 
 static const char * IIC_RECEIVER_TAG = "iic_receiver";
 
 char message[] = I2C_TEST_DATA;
-iic_command_received_from_master_event_handler_t receiver_command_received_event_handler;
+gsdc_iic_command_received_event_handler_t command_received_event_handler;
 
 
-void i2c_create_receiver_task(iic_configuration_t * iicConfiguration, iic_command_received_from_master_event_handler_t * handler)
+void gsdc_iic_receiver_create_task(gsdc_iic_configuration_t * iicConfiguration, gsdc_iic_command_received_event_handler_t * handler)
 {
-    receiver_command_received_event_handler = (iic_command_received_from_master_event_handler_t)handler;
+    command_received_event_handler = (gsdc_iic_command_received_event_handler_t)handler;
     receiver_init(iicConfiguration);
     xTaskCreate(receiver_task, "receiver_task", I2C_SLAVE_TX_BUF_LEN * 3, (void *)1, 10, NULL);
 }
@@ -31,7 +30,7 @@ void i2c_create_receiver_task(iic_configuration_t * iicConfiguration, iic_comman
 /**
  * @brief i2c slave initialization
  */
-esp_err_t receiver_init(iic_configuration_t * iicConfiguration)
+esp_err_t receiver_init(gsdc_iic_configuration_t * iicConfiguration)
 {
     int iicPortNumber = I2C_SLAVE_NUM;
     i2c_config_t iicSlaveConfiguration = {
@@ -58,7 +57,7 @@ esp_err_t receiver_init(iic_configuration_t * iicConfiguration)
     return err;
 }
 
-void receiver_send_test_data()
+void gsdc_iic_receiver_send_test_data()
 {
     char data_size[IIC_MESSAGE_LENGTH_FIELD_SIZE+1];
     size_t message_length = strlen(message);
@@ -68,7 +67,7 @@ void receiver_send_test_data()
     i2c_slave_write_buffer(I2C_SLAVE_NUM, (uint8_t*)&message, message_length, 10 / portTICK_PERIOD_MS);
 }
 
-void i2c_send_data(const char * out_message, size_t length)
+void gsdc_iic_receiver_send_data(const char * out_message, size_t length)
 {
     char data_size[IIC_MESSAGE_LENGTH_FIELD_SIZE+1];
     sprintf(data_size, "%4i", length);
@@ -79,15 +78,15 @@ void i2c_send_data(const char * out_message, size_t length)
 void receiver_task(void * parameters) 
 {
     int size;
-    uint8_t * szCommand = (uint8_t *)calloc(COMMAND_LENGTH, sizeof(uint8_t));
-    led_controller_t * readingLEDController = get_led_controller_configured_for_gpio_pin(READING_GPIO);
+    uint8_t * szCommand = (uint8_t *)calloc(GSDC_IIC_COMMAND_LENGTH, sizeof(uint8_t));
+    led_controller_t * readingLEDController = create_led_controller_configured_for_gpio_pin(READING_GPIO);
     
     for( ;; )
     {
         readingLEDController->invert_led_state(readingLEDController);
-        size = i2c_slave_read_buffer(I2C_SLAVE_NUM, szCommand, COMMAND_LENGTH, 1000 / portTICK_PERIOD_MS);
+        size = i2c_slave_read_buffer(I2C_SLAVE_NUM, szCommand, GSDC_IIC_COMMAND_LENGTH, 1000 / portTICK_PERIOD_MS);
         readingLEDController->invert_led_state(readingLEDController);        
-        szCommand[COMMAND_LENGTH] = '\0';
+        szCommand[GSDC_IIC_COMMAND_LENGTH] = '\0';
         if(size <= 0) { continue; }
         
         xTaskCreate(command_received_callback_task, "command_received_callback_task", I2C_SLAVE_TX_BUF_LEN / 2, (void *)szCommand, 10, NULL);
@@ -99,7 +98,7 @@ void command_received_callback_task(void * parameters)
 {
     char * szCommand = (char *)parameters;
     // invoke the callback
-    receiver_command_received_event_handler(szCommand);
+    command_received_event_handler(szCommand);
     // delete task when finished
     vTaskDelete(NULL);
 }
