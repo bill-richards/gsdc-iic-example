@@ -31,19 +31,6 @@ void initialize_master(gsdc_iic_configuration_t * configuration);           //
 
 static const char * MAIN_TAG = "main";
 
-void initialize_receiver(gsdc_iic_configuration_t * configuration)
-{
-    ESP_LOGI(MAIN_TAG, "Starting the IIC-Receiver thread ...");
-    gsdc_iic_receiver_create_task(configuration, (gsdc_iic_command_received_event_handler_t *)&command_received_from_master_callback);
-}
-
-void initialize_master(gsdc_iic_configuration_t * configuration)
-{
-    ESP_LOGI(MAIN_TAG, "Starting the IIC-Master thread ...");
-    configuration->data_received_from_client = &client_data_received_callback;
-    gsdc_iic_master_task_create(configuration);
-}
-
 void app_main(void)
 {
     gsdc_iic_configuration_file_data_t spiffs_info = {
@@ -62,6 +49,19 @@ void app_main(void)
 #else
      initialize_receiver(configuration);
 #endif
+}
+
+void initialize_master(gsdc_iic_configuration_t * configuration)
+{
+    ESP_LOGI(MAIN_TAG, "Starting the IIC-Master thread ...");
+    configuration->data_received_from_client = &client_data_received_callback;
+    gsdc_iic_master_task_create(configuration);
+}
+
+void initialize_receiver(gsdc_iic_configuration_t * configuration)
+{
+    ESP_LOGI(MAIN_TAG, "Starting the IIC-Receiver thread ...");
+    gsdc_iic_receiver_create_task(configuration, (gsdc_iic_command_received_event_handler_t *)&command_received_from_master_callback);
 }
 
 /**
