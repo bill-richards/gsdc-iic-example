@@ -20,6 +20,7 @@ typedef struct {
     gsdc_iic_connected_device_t * ConnectedDevices;
     int ConnectedDeviceCount;
     uint8_t I2CAddress;
+    QueueHandle_t IncomingDataQueue;
 
     void (* data_received_from_client)(gsdc_iic_connected_device_t * client);
     gsdc_iic_connected_device_t * (*get_connected_device)(int index);    
