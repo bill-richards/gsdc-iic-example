@@ -3,11 +3,12 @@
 #include "gsdc_iic_master.h"
 #include "gsdc_iic_transmisson.h"
 #include "led_controller.h"
-
-#include "freertos/FreeRTOS.h"
-#include "queue.h"
 #include "esp_system_includes.h"
 #include "esp_logging.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
 
 #include <string.h>
 
@@ -44,12 +45,12 @@ void internal_incoming_data_queue_monitor_task(void * parameters)
         if(xQueueReceive(incomingDataQueue, &receivedData, pdMS_TO_TICKS(10)) == pdPASS)
         {
             char task_name[36];
-            sprintf(&task_name, "client_data_received_from_%x_task", receivedData.device->I2CAddress);
+            sprintf(task_name, "%x_data_task", receivedData.device->I2CAddress);
             xTaskCreatePinnedToCore(client_data_received_task, 
-                                        task_name, 
-                                        sizeof(private_client_data_received_parameters_t), 
-                                        (void *)&receivedData, 
-                                        2, NULL, 1);
+                                    task_name, 
+                                    2048, 
+                                    (void*)&receivedData, 
+                                    3, NULL, 1);
         }
 
         taskYIELD();
@@ -70,7 +71,7 @@ void gsdc_iic_master_task_create(gsdc_iic_configuration_t * iic_configuration)
 {
     internal_initialize_if_needed();
     internal_create_incoming_data_queue(iic_configuration);
-    xTaskCreatePinnedToCore(master_writer_task, "master_writer_task", ((I2C_SLAVE_TX_BUF_LEN * 2)+ (sizeof(led_controller_t)*2)), (void *)iic_configuration, 10, NULL, 1);
+    xTaskCreatePinnedToCore(master_writer_task, "master_writer_task", ((I2C_SLAVE_TX_BUF_LEN * 2)+(sizeof(led_controller_t)*2)), (void *)iic_configuration, 10, NULL, 1);
 }
 
 void internal_initialize_if_needed()
@@ -111,13 +112,10 @@ esp_err_t internal_i2c_master_init(void)
 
 void client_data_received_task(void * parameters)
 {
-    TaskStatus_t xTaskDetails;
-    vTaskGetInfo(NULL, &xTaskDetails, pdTRUE, eInvalid);
-    ESP_LOGI(xTaskDetails.pcTaskName, "Running received data task: calling callback function");
-
     private_client_data_received_parameters_t * data_parameters = (private_client_data_received_parameters_t*)parameters;
+    configASSERT(data_parameters != NULL);
+
     data_parameters->configuration->data_received_from_client(data_parameters->device);
-    ESP_LOGI(xTaskDetails.pcTaskName, "                           Received data task completed... deleting");
     vTaskDelete(NULL);
 }
 

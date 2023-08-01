@@ -1,5 +1,3 @@
-#include <gsdc_iic_common.h>
-#include <gsdc_iic_configuration.h>
 #include <stdio.h>
 #include <string.h>
 #include <esp_logging.h>

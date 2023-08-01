@@ -1,8 +1,6 @@
 #include "gsdc_iic_configuration.h"
-#include "gsdc_iic_common.h"
 
 #include "esp_logging.h"
-#include "configuration_file.h"
 #include <string.h>
 
 static const char * IIC_CONFIGURATION_TAG = "iic_configuration";

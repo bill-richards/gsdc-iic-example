@@ -10,7 +10,7 @@
 #include <string.h>                             //
                                                 //
 #include <esp_logging.h>                        //
-#include <gsdc_iic_master.h>                    //
+#include "gsdc_iic_master.h"                    //
 #include <gsdc_iic_receiver.h>                  //
                                                 //
 #include "main.h"                               //
@@ -72,14 +72,12 @@ void app_main(void)
  */
 void client_data_received_callback(gsdc_iic_connected_device_t * client)
 {
-    char message[128];
-    sprintf(message, "                                      %4i bytes received from %2X\n", client->DataLength, client->I2CAddress);
-    take_semaphore();
-    display_buffer_contents((uint8_t *)&message, strlen(message));
+    ESP_LOGI(MAIN_TAG, "                                      %4i bytes received from %2X", client->DataLength, client->I2CAddress);
 #ifdef SHOW_RECEIVED_DATA
+    take_semaphore();
     display_buffer_contents(client->ReceivedData, client->DataLength);
-#endif
     give_semaphore();
+#endif
 }
 
 /**
@@ -100,7 +98,7 @@ void command_received_from_master_callback(const char * command)
 #else
     // collect and send the real data from the ocnnected sensor
     char * collated_data =  "This is not test data, this is data collected outside of the iic component library, and transmitted by the iic component";
-    iic_receiver_send_data(collated_data, strlen(collated_data));
+    gsdc_iic_receiver_send_data(collated_data, strlen(collated_data));
 #endif
     }
 }
