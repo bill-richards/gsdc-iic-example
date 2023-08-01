@@ -18,16 +18,15 @@ typedef struct {
 
 } private_client_data_received_parameters_t;
 
-void data_received_callback_task(void * parameters);
-void master_writer_task(void *parameters);
-void client_data_received_task(void * parameters);
 
-esp_err_t internal_i2c_master_init(void);
-void internal_initialize_if_needed(void);
-
-void internal_incoming_data_queue_monitor_task(void * parameters);
+void internal_client_data_received_task(void * parameters);
 void internal_create_incoming_data_queue(gsdc_iic_configuration_t * iic_configuration);
+esp_err_t internal_i2c_master_init(void);
+void internal_incoming_data_queue_monitor_task(void * parameters);
+void internal_initialize_if_needed(void);
+void internal_master_writer_task(void *parameters);
 size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_device_t * device, led_controller_t * read_indicator, led_controller_t * write_indicator);
+
 
 static bool IsInitialized = false;
 static const char * IIC_MASTER_TAG = "iic_master";
@@ -35,26 +34,14 @@ static const char * IIC_MASTER_TASK_TAG = "iic_master_task";
 
 static uint8_t COMMAND[] = GSDC_IIC_COMMANDS_SEND_ALL_DATA;
 
-void internal_incoming_data_queue_monitor_task(void * parameters)
+
+void internal_client_data_received_task(void * parameters)
 {
-    QueueHandle_t incomingDataQueue = (QueueHandle_t)parameters;
-    private_client_data_received_parameters_t receivedData;
+    private_client_data_received_parameters_t * data_parameters = (private_client_data_received_parameters_t*)parameters;
+    configASSERT(data_parameters != NULL);
 
-    while(true)
-    {
-        if(xQueueReceive(incomingDataQueue, &receivedData, pdMS_TO_TICKS(10)) == pdPASS)
-        {
-            char task_name[36];
-            sprintf(task_name, "%x_data_task", receivedData.device->I2CAddress);
-            xTaskCreatePinnedToCore(client_data_received_task, 
-                                    task_name, 
-                                    2048, 
-                                    (void*)&receivedData, 
-                                    3, NULL, 1);
-        }
-
-        taskYIELD();
-    }
+    data_parameters->configuration->data_received_from_client(data_parameters->device);
+    vTaskDelete(NULL);
 }
 
 void internal_create_incoming_data_queue(gsdc_iic_configuration_t * iic_configuration)
@@ -65,21 +52,6 @@ void internal_create_incoming_data_queue(gsdc_iic_configuration_t * iic_configur
                             I2C_SLAVE_TX_BUF_LEN * 2, 
                             (void *)iic_configuration->IncomingDataQueue, 
                             2, NULL, 1);
-}
-
-void gsdc_iic_master_task_create(gsdc_iic_configuration_t * iic_configuration)
-{
-    internal_initialize_if_needed();
-    internal_create_incoming_data_queue(iic_configuration);
-    xTaskCreatePinnedToCore(master_writer_task, "master_writer_task", ((I2C_SLAVE_TX_BUF_LEN * 2)+(sizeof(led_controller_t)*2)), (void *)iic_configuration, 10, NULL, 1);
-}
-
-void internal_initialize_if_needed()
-{
-    if(IsInitialized) {
-        return;
-    }
-    internal_i2c_master_init();
 }
 
 esp_err_t internal_i2c_master_init(void)
@@ -110,16 +82,37 @@ esp_err_t internal_i2c_master_init(void)
     return err;
 }
 
-void client_data_received_task(void * parameters)
+void internal_incoming_data_queue_monitor_task(void * parameters)
 {
-    private_client_data_received_parameters_t * data_parameters = (private_client_data_received_parameters_t*)parameters;
-    configASSERT(data_parameters != NULL);
+    QueueHandle_t incomingDataQueue = (QueueHandle_t)parameters;
+    private_client_data_received_parameters_t receivedData;
 
-    data_parameters->configuration->data_received_from_client(data_parameters->device);
-    vTaskDelete(NULL);
+    while(true)
+    {
+        if(xQueueReceive(incomingDataQueue, &receivedData, pdMS_TO_TICKS(10)) == pdPASS)
+        {
+            char task_name[36];
+            sprintf(task_name, "%x_data_task", receivedData.device->I2CAddress);
+            xTaskCreatePinnedToCore(internal_client_data_received_task, 
+                                    task_name, 
+                                    2048, 
+                                    (void*)&receivedData, 
+                                    3, NULL, 1);
+        }
+
+        taskYIELD();
+    }
 }
 
-void master_writer_task(void *parameters)
+void internal_initialize_if_needed()
+{
+    if(IsInitialized) {
+        return;
+    }
+    internal_i2c_master_init();
+}
+
+void internal_master_writer_task(void *parameters)
  {
     gsdc_iic_configuration_t * configuration = (gsdc_iic_configuration_t*) parameters;
 
@@ -187,4 +180,18 @@ size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_dev
     read_indicator->invert_led_state(read_indicator);
 
     return device->DataLength;
+}
+
+// ////////////////////////////////////////////////////
+//
+//                  Public members
+//
+// ////////////////////////////////////////////////////
+
+
+void gsdc_iic_master_task_create(gsdc_iic_configuration_t * iic_configuration)
+{
+    internal_initialize_if_needed();
+    internal_create_incoming_data_queue(iic_configuration);
+    xTaskCreatePinnedToCore(internal_master_writer_task, "internal_master_writer_task", ((I2C_SLAVE_TX_BUF_LEN * 2)+(sizeof(led_controller_t)*2)), (void *)iic_configuration, 10, NULL, 1);
 }
