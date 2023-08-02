@@ -24,9 +24,8 @@
 extern "C" {
 #endif
 
-esp_err_t __attribute__((unused)) i2c_master_read_from_slave(uint8_t iicAddress, uint8_t *data_rd, size_t size);
-esp_err_t __attribute__((unused)) i2c_master_write_to_slave(uint8_t iicAddress, uint8_t *data_wr, size_t size);
-void __attribute__((unused)) i2c_master_read_variable_length_from_slave(gsdc_iic_connected_device_t * device);
+esp_err_t __attribute__((unused)) iic_master_write_to_slave(uint8_t iicAddress, uint8_t *data_wr, size_t size);
+void __attribute__((unused)) iic_master_read_variable_length_from_slave(gsdc_iic_connected_device_t * device);
 
 #ifdef __cplusplus
 }

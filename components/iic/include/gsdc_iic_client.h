@@ -49,11 +49,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/**
+ * @brief Instantiates the client task responsible for listening on the IIC Bus
+ * @param iic_configuration a populated gsdc_iic_configuration_t describing the configuration file
+ * @param handler a gsdc_iic_command_received_event_handler_t callback function for processing the incoming command
+ */
 void gsdc_iic_client_create_task(gsdc_iic_configuration_t * iic_configuration, gsdc_iic_command_received_event_handler_t * handler);
+/**
+ * @brief Sends the given message to the master on the IIC Bus
+ * @param out_message the data to send
+ * @param length the length of the data being sent
+ */
 void gsdc_iic_client_send_data(const char * out_message, size_t length);
 
 #ifdef CONFIG_USE_TEST_MESSAGE_DATA
+/**
+ * @brief sends some pre-configured test data to the master on the IIC Bus. This member is only available when CONFIG_USE_TEST_MESSAGE_DATA is defined
+ */
 void gsdc_iic_client_send_test_data();
 #endif // CONFIG_USE_TEST_MESSAGE_DATA
 

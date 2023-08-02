@@ -153,7 +153,7 @@ size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_dev
 
     ESP_LOGV(IIC_MASTER_TAG, "Master requesting from IIC device : %2X ", device->I2CAddress);
     write_indicator->invert_led_state(write_indicator);
-    ret = i2c_master_write_to_slave(device->I2CAddress, command, strlen((char*)command));
+    ret = iic_master_write_to_slave(device->I2CAddress, command, strlen((char*)command));
     write_indicator->invert_led_state(write_indicator);
 
     if(ret == ESP_ERR_TIMEOUT)
@@ -175,7 +175,7 @@ size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_dev
 
     if(ret != ESP_OK) { return 0; }
     read_indicator->invert_led_state(read_indicator);
-    i2c_master_read_variable_length_from_slave(device);
+    iic_master_read_variable_length_from_slave(device);
     read_indicator->invert_led_state(read_indicator);
 
     return device->DataLength;

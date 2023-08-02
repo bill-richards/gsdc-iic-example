@@ -111,7 +111,6 @@ void parse_clients(int configuration_item_index, uint8_t iic_master)
             .I2CAddress = strtol(current_address, (char**)NULL, 16),
             .MasterI2CAddress = iic_master,
             .DataLength = 0,
-            //.ReceivedData = (uint8_t *)calloc(PACKET_LENGTH, sizeof(uint8_t)),
         };
 
         memcpy(&clients[index++], &client, sizeof(gsdc_iic_connected_device_t));
