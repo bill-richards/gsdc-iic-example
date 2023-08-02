@@ -24,8 +24,18 @@
 extern "C" {
 #endif
 
+/**
+ * @brief internal use. Writes data to the IIC Bus
+ * @param iicAddress (uint8_t) IIC address of the client to receive the message
+ * @param data_wr (uint8_t*) the message to send to the client
+ * @param size (size_t) the length of the message being sent
+ */
 esp_err_t __attribute__((unused)) iic_master_write_to_slave(uint8_t iicAddress, uint8_t *data_wr, size_t size);
-void __attribute__((unused)) iic_master_read_variable_length_from_slave(gsdc_iic_connected_device_t * device);
+/**
+ * @brief internal use. Reads a message from the IIC Bus
+ * @param device (gsdc_iic_connected_device_t *) the structure represents the connected IIC device and contains the data read from that client
+ */
+void __attribute__((unused)) iic_master_read_from_slave(gsdc_iic_connected_device_t * device);
 
 #ifdef __cplusplus
 }

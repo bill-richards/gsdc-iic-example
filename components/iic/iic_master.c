@@ -175,7 +175,7 @@ size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_dev
 
     if(ret != ESP_OK) { return 0; }
     read_indicator->invert_led_state(read_indicator);
-    iic_master_read_variable_length_from_slave(device);
+    iic_master_read_from_slave(device);
     read_indicator->invert_led_state(read_indicator);
 
     return device->DataLength;
