@@ -1,33 +1,35 @@
 // //////////////////////////////////////////// //
-//                                              //
 //                DEPENDENCIES                  //
-//                                              //
 // //////////////////////////////////////////// //
 #include <freertos/FreeRTOS.h>                  //
 #include <freertos/task.h>                      //
 #include <string.h>                             //
-                                                //
+//                                              //
 #include <esp_logging.h>                        //
-#include "gsdc_iic_master.h"                    //
+#include <gsdc_iic_master.h>                    //
 #include <gsdc_iic_client.h>                    //
-                                                //
+//                                              //
 #include "main.h"                               //
 // //////////////////////////////////////////// //
 
 // //////////////////////////////////////////////////////////////////////// //
-//                                                                          //
 //                       FORWARD DECLARATIONS                               //
-//                                                                          //
 // //////////////////////////////////////////////////////////////////////// //
-                                                                            //
+//                                                                          //
 void command_received_from_master_callback(const char * command);           //
 void client_data_received_callback(gsdc_iic_connected_device_t * client);   //
-void initialize_client(gsdc_iic_configuration_t * configuration);         //
+void initialize_client(gsdc_iic_configuration_t * configuration);           //
 void initialize_master(gsdc_iic_configuration_t * configuration);           //
-                                                                            //
+//                                                                          //
 // //////////////////////////////////////////////////////////////////////// //
 
-static const char * MAIN_TAG = "main";
+// //////////////////////////////////////////////////////////////// //
+//                      LOCAL VARIABLES                             //
+// //////////////////////////////////////////////////////////////// //
+//                                                                  //
+static const char * MAIN_TAG = "main";                              //
+//                                                                  //
+// //////////////////////////////////////////////////////////////// //
 
 void app_main(void)
 {

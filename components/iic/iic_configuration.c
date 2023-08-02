@@ -1,32 +1,34 @@
-#include "gsdc_iic_configuration.h"
+// //////////////////////////////////////////// //
+//                DEPENDENCIES                  //
+// //////////////////////////////////////////// //
+#include <esp_logging.h>                        //
+#include <string.h>                             //
+//                                              //
+#include "gsdc_iic_configuration.h"             //
+// //////////////////////////////////////////// //
 
-#include "esp_logging.h"
-#include <string.h>
+// //////////////////////////////////////////////////////////////////////////////////////////// //
+//                                  FORWARD DECLARATIONS                                        //
+// //////////////////////////////////////////////////////////////////////////////////////////// //
+//                                                                                              //
+config_key_value_pair_t * internal_create_new_config_line(void);                                //
+gsdc_iic_connected_device_t * internal_get_connected_device(int index);                         //
+void internal_load_iic_configuration(void);                                                     //
+void internal_parse_clients(int configuration_item_index, uint8_t iic_master);                  //
+bool internal_read_configuration_item(const char * key, config_key_value_pair_t * config_line); //
+//                                                                                              //
+// //////////////////////////////////////////////////////////////////////////////////////////// //
 
-static const char * IIC_CONFIGURATION_TAG = "iic_configuration";
-static const char * KEY_IIC_CLIENTS =  "CLIENTS";
-static const char * KEY_LOCAL_IIC_ADDRESS =  "IIC";
-gsdc_iic_configuration_t IIC_Configuration;
-
-config_key_value_pair_t * internal_create_new_config_line(void);
-gsdc_iic_connected_device_t * internal_get_connected_device(int index);
-void internal_load_iic_configuration(void);
-void internal_parse_clients(int configuration_item_index, uint8_t iic_master);
-bool internal_read_configuration_item(const char * key, config_key_value_pair_t * config_line);
-
-gsdc_iic_configuration_t * gsdc_iic_configuration_init(gsdc_iic_configuration_file_data_t * spiffs_info)
-{
-    ESP_LOGI(IIC_CONFIGURATION_TAG, "Initializing IIC configuration ...");
-    gsdc_iic_configuration_t configuration = {
-        .SpiffsInfo = spiffs_info,
-        .get_connected_device = internal_get_connected_device,
-        .read_configuration_item = internal_read_configuration_item,
-        .load = internal_load_iic_configuration,
-    };
-
-    IIC_Configuration = configuration;
-    return &IIC_Configuration;
-}
+// //////////////////////////////////////////////////////////////// //
+//                      LOCAL VARIABLES                             //
+// //////////////////////////////////////////////////////////////// //
+//                                                                  //
+static const char * IIC_CONFIGURATION_TAG = "iic_configuration";    //
+static const char * KEY_IIC_CLIENTS =  "CLIENTS";                   //
+static const char * KEY_LOCAL_IIC_ADDRESS =  "IIC";                 //
+gsdc_iic_configuration_t IIC_Configuration;                         //
+//                                                                  //
+// //////////////////////////////////////////////////////////////// //
 
 gsdc_iic_connected_device_t * internal_get_connected_device(int index) {
     return &IIC_Configuration.ConnectedDevices[index];
@@ -88,7 +90,6 @@ bool internal_read_configuration_item(const char * key, config_key_value_pair_t 
     return true;
 }
 
-
 config_key_value_pair_t * internal_create_new_config_line()
 {
     return (config_key_value_pair_t *)calloc(1, sizeof(config_key_value_pair_t));
@@ -118,4 +119,23 @@ void internal_parse_clients(int configuration_item_index, uint8_t iic_master)
     IIC_Configuration.ConnectedDevices = clients;
 
     ESP_LOGI(IIC_CONFIGURATION_TAG, "\tNumber of connected IIC devices %x", IIC_Configuration.ConnectedDeviceCount);
+}
+
+
+// //////////////////////////////////////////////////////////////////////////////////////////// //
+// gsdc_iic_configuration.h interface implementation                                            //
+// //////////////////////////////////////////////////////////////////////////////////////////// //
+
+gsdc_iic_configuration_t * gsdc_iic_configuration_init(gsdc_iic_configuration_file_data_t * spiffs_info)
+{
+    ESP_LOGI(IIC_CONFIGURATION_TAG, "Initializing IIC configuration ...");
+    gsdc_iic_configuration_t configuration = {
+        .SpiffsInfo = spiffs_info,
+        .get_connected_device = internal_get_connected_device,
+        .read_configuration_item = internal_read_configuration_item,
+        .load = internal_load_iic_configuration,
+    };
+
+    IIC_Configuration = configuration;
+    return &IIC_Configuration;
 }
