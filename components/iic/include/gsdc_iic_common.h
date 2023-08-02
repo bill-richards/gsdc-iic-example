@@ -47,22 +47,29 @@
 extern "C" {
 #endif
 
-typedef struct connected_device gsdc_iic_connected_device_t;
+// @brief Describes a device connected to the master on the IIC Bus
+typedef struct {
+        // @brief The IIC address of the device
+        uint8_t I2CAddress;
+        // @brief The IIC address of the IIC Master of the connected device
+        uint8_t MasterI2CAddress;
+        // @brief A buffer to contain the data received by the master from the client
+        uint8_t ReceivedData[DATA_LENGTH+1];
+        // @brief The length of the data received from the client
+         size_t DataLength;
+} gsdc_iic_connected_device_t;
+
+// @brief Event handler for when the master has received data froma client via IIC
 typedef void (*gsdc_iic_data_received_from_slave_event_handler_t)(gsdc_iic_connected_device_t * pConnectedDevice);
+// @brief Event handler for when the client has received data command from the master via IIC
 typedef void (*gsdc_iic_command_received_event_handler_t)(const char * command);
 
-struct connected_device {
-        uint8_t I2CAddress;
-        uint8_t MasterI2CAddress;
-        uint8_t ReceivedData[DATA_LENGTH+1];
-         size_t DataLength;
-};
 
-/**
- * @brief test function to show buffer contents
- */
+// @brief function to show buffer contents
 void display_buffer_contents(uint8_t *buf, int len);
+// @brief Give the semaphore
 void give_semaphore();
+// @brief Take the semaphore
 void take_semaphore();
 
 #ifdef __cplusplus
