@@ -24,7 +24,7 @@ esp_err_t internal_i2c_master_init(void);
 void internal_incoming_data_queue_monitor_task(void * parameters);
 void internal_initialize_if_needed(void);
 void internal_master_writer_task(void *parameters);
-size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_device_t * device, led_controller_t * read_indicator, led_controller_t * write_indicator);
+size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_device_t * device, gsdc_led_controller_t * read_indicator, gsdc_led_controller_t * write_indicator);
 
 
 static bool IsInitialized = false;
@@ -115,8 +115,8 @@ void internal_master_writer_task(void *parameters)
  {
     gsdc_iic_configuration_t * configuration = (gsdc_iic_configuration_t*) parameters;
 
-    led_controller_t * read_indicator = create_led_controller_configured_for_gpio_pin(READING_GPIO);
-    led_controller_t * write_indicator = create_led_controller_configured_for_gpio_pin(WRITING_GPIO);
+    gsdc_led_controller_t * read_indicator = create_led_controller_configured_for_gpio_pin(READING_GPIO);
+    gsdc_led_controller_t * write_indicator = create_led_controller_configured_for_gpio_pin(WRITING_GPIO);
 
     long duration, loop_start, loop_stop;
     TickType_t xFrequency = pdMS_TO_TICKS(MASTER_POLLING_PERIOD), xLastWakeTime = xTaskGetTickCount ();
@@ -146,7 +146,7 @@ void internal_master_writer_task(void *parameters)
     }
 }
 
-size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_device_t * device, led_controller_t * read_indicator, led_controller_t * write_indicator)
+size_t internal_send_request_to_device(uint8_t * command, gsdc_iic_connected_device_t * device, gsdc_led_controller_t * read_indicator, gsdc_led_controller_t * write_indicator)
 {
     int ret;
     internal_initialize_if_needed();
@@ -192,5 +192,5 @@ void gsdc_iic_master_task_create(gsdc_iic_configuration_t * iic_configuration)
 {
     internal_initialize_if_needed();
     internal_create_incoming_data_queue(iic_configuration);
-    xTaskCreatePinnedToCore(internal_master_writer_task, "internal_master_writer_task", ((I2C_SLAVE_TX_BUF_LEN * 2)+(sizeof(led_controller_t)*2)), (void *)iic_configuration, 10, NULL, 1);
+    xTaskCreatePinnedToCore(internal_master_writer_task, "internal_master_writer_task", ((I2C_SLAVE_TX_BUF_LEN * 2)+(sizeof(gsdc_led_controller_t)*2)), (void *)iic_configuration, 10, NULL, 1);
 }

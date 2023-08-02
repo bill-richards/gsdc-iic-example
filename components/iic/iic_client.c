@@ -77,7 +77,7 @@ void internal_client_task(void * parameters)
 {
     int size;
     uint8_t * szCommand = (uint8_t *)calloc(GSDC_IIC_COMMAND_LENGTH, sizeof(uint8_t));
-    led_controller_t * readingLEDController = create_led_controller_configured_for_gpio_pin(READING_GPIO);
+    gsdc_led_controller_t * readingLEDController = create_led_controller_configured_for_gpio_pin(READING_GPIO);
     
     for( ;; )
     {
