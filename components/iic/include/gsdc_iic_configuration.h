@@ -13,7 +13,7 @@ extern "C" {
 
 #define IIC_CONFIGURATION_MAXIMUM_CONNECTED_DEVICES 10
 
-typedef configuration_file_data_t gsdc_iic_configuration_file_data_t;
+typedef gsdc_configuration_file_descriptor_t gsdc_iic_configuration_file_data_t;
 
 typedef struct {
     gsdc_iic_configuration_file_data_t * SpiffsInfo;

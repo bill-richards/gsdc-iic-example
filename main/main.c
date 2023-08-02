@@ -70,7 +70,7 @@ void initialize_client(gsdc_iic_configuration_t * configuration)
  */
 void client_data_received_callback(gsdc_iic_connected_device_t * client)
 {
-    ESP_LOGI(MAIN_TAG, "                                      %4i bytes received from %2X", client->DataLength, client->I2CAddress);
+    ESP_LOGI(MAIN_TAG, "\t\t\t\t\t\t\t\t\t\t%4i bytes received from %2X", client->DataLength, client->I2CAddress);
 #ifdef SHOW_RECEIVED_DATA
     take_semaphore();
     display_buffer_contents(client->ReceivedData, client->DataLength);
