@@ -4,37 +4,35 @@
 #include <string.h>
 
 static const char * IIC_CONFIGURATION_TAG = "iic_configuration";
-static const char * clients_key =  "CLIENTS";
-static const char * local_key =  "IIC";
-
-gsdc_iic_connected_device_t * iic_configuration_get_connected_device(int index);
-void iic_configuration_load_iic_configuration(void);
-bool iic_configuration_read_configuration_item(const char * key, config_key_value_pair_t * config_line);
-config_key_value_pair_t * create_new_config_line(void);
-
-void parse_clients(int configuration_item_index, uint8_t iic_master);
-
+static const char * KEY_IIC_CLIENTS =  "CLIENTS";
+static const char * KEY_LOCAL_IIC_ADDRESS =  "IIC";
 gsdc_iic_configuration_t IIC_Configuration;
+
+config_key_value_pair_t * internal_create_new_config_line(void);
+gsdc_iic_connected_device_t * internal_get_connected_device(int index);
+void internal_load_iic_configuration(void);
+void internal_parse_clients(int configuration_item_index, uint8_t iic_master);
+bool internal_read_configuration_item(const char * key, config_key_value_pair_t * config_line);
 
 gsdc_iic_configuration_t * gsdc_iic_configuration_init(gsdc_iic_configuration_file_data_t * spiffs_info)
 {
     ESP_LOGI(IIC_CONFIGURATION_TAG, "Initializing IIC configuration ...");
     gsdc_iic_configuration_t configuration = {
         .SpiffsInfo = spiffs_info,
-        .get_connected_device = iic_configuration_get_connected_device,
-        .read_configuration_item = iic_configuration_read_configuration_item,
-        .load = iic_configuration_load_iic_configuration,
+        .get_connected_device = internal_get_connected_device,
+        .read_configuration_item = internal_read_configuration_item,
+        .load = internal_load_iic_configuration,
     };
 
     IIC_Configuration = configuration;
     return &IIC_Configuration;
 }
 
-gsdc_iic_connected_device_t * iic_configuration_get_connected_device(int index) {
+gsdc_iic_connected_device_t * internal_get_connected_device(int index) {
     return &IIC_Configuration.ConnectedDevices[index];
 }
 
-void iic_configuration_load_iic_configuration()
+void internal_load_iic_configuration()
 {
     ESP_LOGV(IIC_CONFIGURATION_TAG, "Preparing the gsdc_configuration_file_t ...");
     gsdc_configuration_file_descriptor_t descriptor = {
@@ -48,10 +46,10 @@ void iic_configuration_load_iic_configuration()
     Configuration_File.read_content();
 
     ESP_LOGV(IIC_CONFIGURATION_TAG, "Parsing the IIC addresses ...");
-    config_key_value_pair_t * config_line = create_new_config_line();
+    config_key_value_pair_t * config_line = internal_create_new_config_line();
 
     ESP_LOGI(IIC_CONFIGURATION_TAG, "\tReading the local IIC address ...");
-    if(!Configuration_File.get_configuration_item(local_key, config_line))
+    if(!Configuration_File.get_configuration_item(KEY_LOCAL_IIC_ADDRESS, config_line))
     {
         ESP_LOGE(IIC_CONFIGURATION_TAG, "\tFailed to read the local IIC address ...");
         return;
@@ -63,14 +61,14 @@ void iic_configuration_load_iic_configuration()
     ESP_LOGV(IIC_CONFIGURATION_TAG, "\tParsing the remainder of the configuration file ...");
     for(int index = 0; index < Configuration_File.Configuration_Count; index++)
     {
-        if(strcmp((char *)&Configuration_File.Configuration_Items[index].Key, clients_key) == 0) { 
+        if(strcmp((char *)&Configuration_File.Configuration_Items[index].Key, KEY_IIC_CLIENTS) == 0) { 
 
             ESP_LOGI(IIC_CONFIGURATION_TAG, "\tParsing the connected IIC addresses ...");
-            parse_clients(index, IIC_Configuration.I2CAddress);
+            internal_parse_clients(index, IIC_Configuration.I2CAddress);
             continue;
         }
         
-        if(strcmp((char *)&Configuration_File.Configuration_Items[index].Key, local_key) == 0) {
+        if(strcmp((char *)&Configuration_File.Configuration_Items[index].Key, KEY_LOCAL_IIC_ADDRESS) == 0) {
             continue;
         }
 
@@ -79,7 +77,7 @@ void iic_configuration_load_iic_configuration()
     free(config_line);
 }
 
-bool iic_configuration_read_configuration_item(const char * key, config_key_value_pair_t * config_line)
+bool internal_read_configuration_item(const char * key, config_key_value_pair_t * config_line)
 {
     if(!Configuration_File.get_configuration_item(key, config_line)) {
         ESP_LOGE(IIC_CONFIGURATION_TAG, "Failed to retrieve config item [%-10s]", key);
@@ -91,12 +89,12 @@ bool iic_configuration_read_configuration_item(const char * key, config_key_valu
 }
 
 
-config_key_value_pair_t * create_new_config_line()
+config_key_value_pair_t * internal_create_new_config_line()
 {
     return (config_key_value_pair_t *)calloc(1, sizeof(config_key_value_pair_t));
 }
 
-void parse_clients(int configuration_item_index, uint8_t iic_master)
+void internal_parse_clients(int configuration_item_index, uint8_t iic_master)
 {
     char * saveptr = (char *)&Configuration_File.Configuration_Items[configuration_item_index].Value;
     char * current_address;
