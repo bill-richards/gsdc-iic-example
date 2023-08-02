@@ -10,6 +10,10 @@ static const char * base_path = CONFIG_GSDC_SPIFFS_CONFIG_FILE_SYSTEM_ROOT;
 static const char * base_path = "/spiffs";
 #endif
 
+#ifdef CONFIG_GSDC_IIC_SHOW_RECEIVED_DATA
+#define SHOW_RECEIVED_DATA
+#endif
+
 #ifdef CONFIG_GSDC_SPIFFS_PARTITION_LABEL
 static const char * partition_label = CONFIG_GSDC_SPIFFS_PARTITION_LABEL;
 #else 

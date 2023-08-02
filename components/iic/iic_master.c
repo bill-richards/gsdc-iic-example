@@ -1,5 +1,4 @@
 #include "sdkconfig.h"
-#include "gsdc_iic_receiver.h"
 #include "gsdc_iic_master.h"
 #include "gsdc_iic_transmisson.h"
 #include "led_controller.h"

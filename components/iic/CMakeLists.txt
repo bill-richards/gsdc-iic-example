@@ -1,9 +1,9 @@
 
 SET(app_sources
+        "iic_client.c"
         "iic_common.c"
         "iic_configuration.c"
         "iic_master.c"
-        "iic_receiver.c"
         "iic_transmission.c"
 )
 

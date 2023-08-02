@@ -50,11 +50,11 @@
 extern "C" {
 #endif
 
-void gsdc_iic_receiver_create_task(gsdc_iic_configuration_t * iic_configuration, gsdc_iic_command_received_event_handler_t * handler);
-void gsdc_iic_receiver_send_data(const char * out_message, size_t length);
+void gsdc_iic_client_create_task(gsdc_iic_configuration_t * iic_configuration, gsdc_iic_command_received_event_handler_t * handler);
+void gsdc_iic_client_send_data(const char * out_message, size_t length);
 
 #ifdef CONFIG_USE_TEST_MESSAGE_DATA
-void gsdc_iic_receiver_send_test_data();
+void gsdc_iic_client_send_test_data();
 #endif // CONFIG_USE_TEST_MESSAGE_DATA
 
 #ifdef __cplusplus

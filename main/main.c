@@ -1,5 +1,3 @@
-//#define SHOW_RECEIVED_DATA  /* Un-comment to turn on extra tracing output*/
-
 // //////////////////////////////////////////// //
 //                                              //
 //                DEPENDENCIES                  //
@@ -11,7 +9,7 @@
                                                 //
 #include <esp_logging.h>                        //
 #include "gsdc_iic_master.h"                    //
-#include <gsdc_iic_receiver.h>                  //
+#include <gsdc_iic_client.h>                    //
                                                 //
 #include "main.h"                               //
 // //////////////////////////////////////////// //
@@ -24,7 +22,7 @@
                                                                             //
 void command_received_from_master_callback(const char * command);           //
 void client_data_received_callback(gsdc_iic_connected_device_t * client);   //
-void initialize_receiver(gsdc_iic_configuration_t * configuration);         //
+void initialize_client(gsdc_iic_configuration_t * configuration);         //
 void initialize_master(gsdc_iic_configuration_t * configuration);           //
                                                                             //
 // //////////////////////////////////////////////////////////////////////// //
@@ -47,7 +45,7 @@ void app_main(void)
 #if CONFIG_GSDC_IIC_IS_MASTER
      initialize_master(configuration);
 #else
-     initialize_receiver(configuration);
+     initialize_client(configuration);
 #endif
 }
 
@@ -58,10 +56,10 @@ void initialize_master(gsdc_iic_configuration_t * configuration)
     gsdc_iic_master_task_create(configuration);
 }
 
-void initialize_receiver(gsdc_iic_configuration_t * configuration)
+void initialize_client(gsdc_iic_configuration_t * configuration)
 {
     ESP_LOGI(MAIN_TAG, "Starting the IIC-Receiver thread ...");
-    gsdc_iic_receiver_create_task(configuration, (gsdc_iic_command_received_event_handler_t *)&command_received_from_master_callback);
+    gsdc_iic_client_create_task(configuration, (gsdc_iic_command_received_event_handler_t *)&command_received_from_master_callback);
 }
 
 /**
@@ -94,11 +92,11 @@ void command_received_from_master_callback(const char * command)
     if(strcmp(GSDC_IIC_COMMANDS_SEND_ALL_DATA, command) == 0)
     {
 #ifdef CONFIG_USE_TEST_MESSAGE_DATA
-        gsdc_iic_receiver_send_test_data();
+        gsdc_iic_client_send_test_data();
 #else
     // collect and send the real data from the ocnnected sensor
     char * collated_data =  "This is not test data, this is data collected outside of the iic component library, and transmitted by the iic component";
-    gsdc_iic_receiver_send_data(collated_data, strlen(collated_data));
+    gsdc_iic_client_send_data(collated_data, strlen(collated_data));
 #endif
     }
 }

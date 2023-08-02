@@ -34,8 +34,6 @@ gsdc_iic_connected_device_t * iic_configuration_get_connected_device(int index) 
     return &IIC_Configuration.ConnectedDevices[index];
 }
 
-
-
 void iic_configuration_load_iic_configuration()
 {
     ESP_LOGV(IIC_CONFIGURATION_TAG, "Preparing the configuration_file_t ...");
