@@ -61,7 +61,9 @@ void initialize_master(gsdc_iic_configuration_t * configuration)
 {
     ESP_LOGI(MAIN_TAG, "Starting the IIC-Master thread ...");
     configuration->data_received_from_client = &client_data_received_callback;
+
     gsdc_iic_master_task_create(configuration);
+    gsdc_iic_send_reset_command_to_connected_devices();
 }
 
 void initialize_client(gsdc_iic_configuration_t * configuration)
@@ -109,6 +111,7 @@ void command_received_from_master_callback(const char * command)
     }
     else if(strcmp(GSDC_IIC_COMMANDS_RESTART_MCU, command) == 0)
     {
+        ESP_LOGW(MAIN_TAG, "Reset Command received: resetting ...");
         esp_restart();
     }
 }
