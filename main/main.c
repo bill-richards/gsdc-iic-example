@@ -13,14 +13,12 @@
 #include "main.h"                               //
 // //////////////////////////////////////////// //
 
-
-
 // //////////////////////////////////////////////////////////////////////// //
 //                       FORWARD DECLARATIONS                               //
 // //////////////////////////////////////////////////////////////////////// //
 //                                                                          //
-void command_received_from_master_callback(const char * command);           //
 void client_data_received_callback(gsdc_iic_connected_device_t * client);   //
+void command_received_from_master_callback(const char * command);           //
 void initialize_client(gsdc_iic_configuration_t * configuration);           //
 void initialize_master(gsdc_iic_configuration_t * configuration);           //
 //                                                                          //
