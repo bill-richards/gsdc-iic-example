@@ -8,9 +8,12 @@
 #include <esp_logging.h>                        //
 #include <gsdc_iic_master.h>                    //
 #include <gsdc_iic_client.h>                    //
+#include <gsdc_ota_subsystem.h>                 //
 //                                              //
 #include "main.h"                               //
 // //////////////////////////////////////////// //
+
+
 
 // //////////////////////////////////////////////////////////////////////// //
 //                       FORWARD DECLARATIONS                               //
@@ -44,11 +47,14 @@ void app_main(void)
     ESP_LOGI(MAIN_TAG, "Loading the IIC configuration");
     configuration->load();
 
+    gsdc_ota_subsystem_initialize(configuration->I2CAddress);
+
 #if CONFIG_GSDC_IIC_IS_MASTER
      initialize_master(configuration);
 #else
      initialize_client(configuration);
 #endif
+
 }
 
 void initialize_master(gsdc_iic_configuration_t * configuration)
@@ -72,7 +78,7 @@ void initialize_client(gsdc_iic_configuration_t * configuration)
  */
 void client_data_received_callback(gsdc_iic_connected_device_t * client)
 {
-    ESP_LOGI(MAIN_TAG, "\t\t\t\t\t\t\t\t\t\t%4i bytes received from %2X", client->DataLength, client->I2CAddress);
+    ESP_LOGI(MAIN_TAG, "\t\t\t\t\t\t%4i bytes received from %2X", client->DataLength, client->I2CAddress);
 #ifdef SHOW_RECEIVED_DATA
     take_semaphore();
     display_buffer_contents(client->ReceivedData, client->DataLength);
@@ -100,5 +106,9 @@ void command_received_from_master_callback(const char * command)
     char * collated_data =  "This is not test data, this is data collected outside of the iic component library, and transmitted by the iic component";
     gsdc_iic_client_send_data(collated_data, strlen(collated_data));
 #endif
+    }
+    else if(strcmp(GSDC_IIC_COMMANDS_RESTART_MCU, command) == 0)
+    {
+        esp_restart();
     }
 }
