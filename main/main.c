@@ -42,8 +42,11 @@ void app_main(void)
 
     ESP_LOGI(MAIN_TAG, "Initializing the file system");
     gsdc_iic_configuration_t * configuration = gsdc_iic_configuration_init(&spiffs_info);
+    
     ESP_LOGI(MAIN_TAG, "Loading the IIC configuration");
     configuration->load();
+    
+    ESP_LOGI(MAIN_TAG, "Loading the OTA Update configuration");
     gsdc_ota_subsystem_initialize(&spiffs_info);
 
     if(configuration->ConnectedDeviceCount > 0) {
@@ -51,13 +54,6 @@ void app_main(void)
     } else {
         initialize_client(configuration);
     }
-
-// #if CONFIG_GSDC_IIC_IS_MASTER
-//      initialize_master(configuration);
-// #else
-//     initialize_client(configuration);
-// #endif
-
 }
 
 void initialize_master(gsdc_iic_configuration_t * configuration)
@@ -67,11 +63,12 @@ void initialize_master(gsdc_iic_configuration_t * configuration)
 
     gsdc_iic_master_task_create(configuration);
     gsdc_iic_send_reset_command_to_connected_devices();
+    vTaskDelay(pdMS_TO_TICKS(100));
 }
 
 void initialize_client(gsdc_iic_configuration_t * configuration)
 {
-    ESP_LOGI(MAIN_TAG, "Starting the IIC-Receiver thread ...");
+    ESP_LOGI(MAIN_TAG, "Starting the IIC-Client thread ...");
     gsdc_iic_client_create_task(configuration, (gsdc_iic_command_received_event_handler_t *)&command_received_from_master_callback);
 }
 
@@ -102,19 +99,22 @@ void client_data_received_callback(gsdc_iic_connected_device_t * client)
 void command_received_from_master_callback(const char * command)
 {
     ESP_LOGV(MAIN_TAG, "Command received: %s", command);
+
+    if(strcmp(GSDC_IIC_COMMANDS_RESTART_MCU, command) == 0)
+    {
+        ESP_LOGW(MAIN_TAG, "Reset Command received: resetting ...");
+        esp_restart();
+    } 
+
     if(strcmp(GSDC_IIC_COMMANDS_SEND_ALL_DATA, command) == 0)
     {
 #ifdef CONFIG_USE_TEST_MESSAGE_DATA
         gsdc_iic_client_send_test_data();
 #else
-    // collect and send the real data from the ocnnected sensor
-    char * collated_data =  "This is not test data, this is data collected outside of the iic component library, and transmitted by the iic component";
-    gsdc_iic_client_send_data(collated_data, strlen(collated_data));
+        // collect and send the real data from the ocnnected sensor
+        char * collated_data =  "This is not test data, this is data collected outside of the iic component library, and transmitted by the iic component";
+        gsdc_iic_client_send_data(collated_data, strlen(collated_data));
 #endif
-    }
-    else if(strcmp(GSDC_IIC_COMMANDS_RESTART_MCU, command) == 0)
-    {
-        ESP_LOGW(MAIN_TAG, "Reset Command received: resetting ...");
-        esp_restart();
+        return;
     }
 }
