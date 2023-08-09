@@ -45,7 +45,7 @@ void app_main(void)
     ESP_LOGI(MAIN_TAG, "Loading the IIC configuration");
     configuration->load();
 
-    gsdc_ota_subsystem_initialize(configuration->I2CAddress);
+    gsdc_ota_subsystem_initialize(&spiffs_info);
 
 #if CONFIG_GSDC_IIC_IS_MASTER
      initialize_master(configuration);
