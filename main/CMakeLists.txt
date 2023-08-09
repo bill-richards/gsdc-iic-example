@@ -9,7 +9,7 @@ SET(required_components
     spi_flash
     configuration_file
     esp_includes
-    iic
+    gsdc_iic
     led_controller
     driver
     gsdc_ota
