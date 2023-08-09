@@ -44,14 +44,19 @@ void app_main(void)
     gsdc_iic_configuration_t * configuration = gsdc_iic_configuration_init(&spiffs_info);
     ESP_LOGI(MAIN_TAG, "Loading the IIC configuration");
     configuration->load();
-
     gsdc_ota_subsystem_initialize(&spiffs_info);
 
-#if CONFIG_GSDC_IIC_IS_MASTER
-     initialize_master(configuration);
-#else
-     initialize_client(configuration);
-#endif
+    if(configuration->ConnectedDeviceCount > 0) {
+        initialize_master(configuration);
+    } else {
+        initialize_client(configuration);
+    }
+
+// #if CONFIG_GSDC_IIC_IS_MASTER
+//      initialize_master(configuration);
+// #else
+//     initialize_client(configuration);
+// #endif
 
 }
 
