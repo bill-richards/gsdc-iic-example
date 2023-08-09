@@ -1,7 +1,7 @@
 menu "GSDC IIC Example Configuration"
 
 orsource "../components/spiffs_file/Kconfig"
-orsource "../components/iic/Kconfig"
+orsource "../components/gsdc_iic/Kconfig"
 
 if GSDC_IIC_IS_MASTER
     config GSDC_IIC_SHOW_RECEIVED_DATA 
