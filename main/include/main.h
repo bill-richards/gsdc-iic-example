@@ -26,5 +26,4 @@ static const char * iic_configuration_file_name = CONFIG_GSDC_IIC_CONFIGURATION_
 static const char * iic_configuration_file_name = "configuration";
 #endif
 
-
 #endif // __MAIN_H__
