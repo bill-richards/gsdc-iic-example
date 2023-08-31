@@ -1,24 +1,8 @@
-FILE(GLOB_RECURSE app_sources ${CMAKE_SOURCE_DIR}/main/*.c)
-#SET( app_sources
-#    ${CMAKE_SOURCE_DIR}/main/main.c
-#    ${CMAKE_SOURCE_DIR}/partition_table/file_system/iic.cfg
-#)
-
-SET(required_components
-    freertos
-    spi_flash
-    configuration_file
-    esp_includes
-    gsdc_iic
-    led_controller
-    driver
-    gsdc_ota
-)
+FILE(GLOB_RECURSE app_sources ${CMAKE_SOURCE_DIR}/main/*.cpp)
 
 idf_component_register(
     SRCS ${app_sources}
-    INCLUDE_DIRS "include"
-    REQUIRES ${required_components}
+    INCLUDE_DIRS include
 )
 
 if(CONFIG_GSDC_SPIFFS_INCLUDE_PARTITION_IMAGE)
