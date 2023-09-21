@@ -3,7 +3,7 @@
 #include <string.h>
 
 static const char * IIC_EXAMPLE_TAG = "iic_example";
-gsdc_bme280::GSDC_SENSOR * connected_sensor;
+gsdc_sensor::bme280::GSDC_SENSOR * connected_sensor;
 
 void client_data_received_callback(gsdc_iic_connected_device_t * client);   
 void command_received_from_master_callback(const char * command);    
@@ -25,7 +25,7 @@ void IIC_Example::initialize_client(gsdc_iic_configuration_t * configuration)
     gsdc_iic_client_create_task(configuration, (gsdc_iic_command_received_event_handler_t *)&command_received_from_master_callback);
 
     // determine the sensor type attached (this will be taken from the local configuration file)
-    connected_sensor = new gsdc_bme280::BME280IIC();
+    connected_sensor = new gsdc_sensor::bme280::BME280IIC();
     connected_sensor->Initialize();
 }
 
